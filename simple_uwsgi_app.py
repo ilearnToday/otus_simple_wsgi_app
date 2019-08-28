@@ -21,7 +21,6 @@ class Application:
         def decorator(f):
             self.add_handler(path, f)
             return f
-
         return decorator
 
     def __call__(self, env, start_response):
@@ -42,7 +41,6 @@ class Application:
             response_body = response['text']
         elif 'json' in response:
             response_body = json.dumps(response['json'])
-            print(response_body)
             response_headers = {'Content-Type': 'text/json'}
 
         status_code = response.get('status_code', 200)
@@ -72,7 +70,6 @@ class Application:
                     "extra_headers": {'Content-Type': self.detect_static_content_type(env)}
                 }
             except (IOError, TypeError):
-                print()
                 return self.not_found_handler(env)
         else:
             return self.not_found_handler(env)
@@ -91,7 +88,6 @@ class Application:
             'status_code': 308,
             'extra_headers': {'Location': path}
         }
-
 
     @staticmethod
     def detect_static_content_type(env):
