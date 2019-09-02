@@ -1,18 +1,28 @@
-from http.client import responses
 import json
 import os
+
+from http.client import responses
+
+from jinja2 import Environment, FileSystemLoader
 
 
 class Application:
     redirect_if_no_trailing_slash = True
 
-    def __init__(self, static_dir=None):
+    def __init__(self, static_dir=None, template_dir=None):
         self.handlers_map = {}
 
         if static_dir:
             self.static_dir = static_dir
         else:
             self.static_dir = "/static/"
+
+        if template_dir:
+            self.template_dir = template_dir
+        else:
+            self.template_dir = "/home/goodei/PycharmProjects/uWSGI/static/templates"
+
+        self.jinja_env = Environment(loader=FileSystemLoader(self.template_dir))
 
     def add_handler(self, path, handler_callable):
         self.handlers_map[path] = handler_callable
@@ -77,6 +87,11 @@ class Application:
                 return self.not_found_handler(env)
         else:
             return self.not_found_handler(env)
+
+    @staticmethod
+    def render_template(env, template_name, *args, **kwargs):
+        template = env.get_template(template_name)
+        return template.render(*args, **kwargs)
 
     @staticmethod
     def not_found_handler(env):
