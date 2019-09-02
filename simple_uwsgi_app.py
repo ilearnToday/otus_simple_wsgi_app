@@ -21,6 +21,7 @@ class Application:
         def decorator(f):
             self.add_handler(path, f)
             return f
+
         return decorator
 
     def __call__(self, env, start_response):
@@ -37,10 +38,13 @@ class Application:
         response = handler(env)
         response_headers = {'Content-Type': 'text/html'}
         response_body = ''
-        if 'text' in response:
-            response_body = response['text']
+
+        if 'data' in response:
+            response_body = response['data']
+        elif 'text' in response:
+            response_body = response['text'].encode('utf-8')
         elif 'json' in response:
-            response_body = json.dumps(response['json'])
+            response_body = json.dumps(response['json']).encode('utf-8')
             response_headers = {'Content-Type': 'text/json'}
 
         status_code = response.get('status_code', 200)
@@ -54,7 +58,7 @@ class Application:
         ),
             list(response_headers.items())
         )
-        return [response_body.encode("utf-8")]
+        return [response_body]
 
     def static_handler(self, env):
         path = env['PATH_INFO']
@@ -62,11 +66,11 @@ class Application:
             path = path[:-1]
         if os.path.exists(os.path.dirname(os.path.abspath(__file__)) + path):
             try:
-                file_connection = open(os.path.dirname(os.path.abspath(__file__)) + path, 'r')
+                file_connection = open(os.path.dirname(os.path.abspath(__file__)) + path, 'rb')
                 content = file_connection.read()
                 file_connection.close()
                 return {
-                    "text": content,
+                    "data": content,
                     "extra_headers": {'Content-Type': self.detect_static_content_type(env)}
                 }
             except (IOError, TypeError):
@@ -93,9 +97,8 @@ class Application:
     def detect_static_content_type(env):
         """
         Return static files content type
-        Doesn't work with images
         :param env: dict
-        :return: sting
+        :return: string
         """
         path = env['PATH_INFO']
         if path.endswith(".css"):
@@ -104,6 +107,8 @@ class Application:
             return "text/html"
         elif path.endswith(".js"):
             return "text/javascript"
+        elif path.endswith(".jpg") or path.endswith(".jpeg"):
+            return "image/jpeg"
         else:
             return TypeError
 
