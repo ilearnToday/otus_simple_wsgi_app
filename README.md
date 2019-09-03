@@ -9,7 +9,7 @@ Install requirements.txt
 ```bash
  pip install -r requirements.txt 
 ```
-##Usage
+## Usage
 Full example you can check in example.py 
 ```python
 from core.py import Application
