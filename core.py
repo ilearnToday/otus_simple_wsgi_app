@@ -10,6 +10,12 @@ class Application:
     redirect_if_no_trailing_slash = True
 
     def __init__(self, static_dir=None, template_dir=None):
+        """
+        static_dir - folder name with static files in project
+        template_dir - folder name with templates in project
+        :param static_dir: str
+        :param template_dir: str
+        """
         self.handlers_map = {}
 
         if static_dir:
@@ -18,9 +24,9 @@ class Application:
             self.static_dir = "/static/"
 
         if template_dir:
-            self.template_dir = template_dir
+            self.template_dir = os.path.dirname(os.path.abspath(__file__)) + template_dir
         else:
-            self.template_dir = "/home/goodei/PycharmProjects/uWSGI/static/templates"
+            self.template_dir = os.path.dirname(os.path.abspath(__file__)) + '/templates'
 
         self.jinja_env = Environment(loader=FileSystemLoader(self.template_dir))
 
@@ -31,14 +37,12 @@ class Application:
         def decorator(f):
             self.add_handler(path, f)
             return f
-
         return decorator
 
     def __call__(self, env, start_response):
         path = env['PATH_INFO']
 
         if self.static_dir in path:
-            print("{}:static dir {}: path".format(self.static_dir, path))
             handler = self.static_handler
         elif not path.endswith("/") and self.redirect_if_no_trailing_slash:
             handler = self.redirect_trailing_slash_handler
@@ -110,11 +114,6 @@ class Application:
 
     @staticmethod
     def detect_static_content_type(env):
-        """
-        Return static files content type
-        :param env: dict
-        :return: string
-        """
         path = env['PATH_INFO']
         if path.endswith(".css"):
             return "text/css"

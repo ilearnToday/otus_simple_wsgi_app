@@ -1,17 +1,13 @@
-from simple_uwsgi_app import Application
-
-
+from core import Application
 
 application = Application()
 
-template = application.render_template(application.jinja_env, 'template_example.html', name="Ivan")
-# application.redirect_if_no_trailing_slash = True
-# application.add_handler('/', index_handler)
-# application.add_handler('/catalog/', catalog_handler)
+kitty_template = application.render_template(application.jinja_env, 'template_example.html', name="Kitty")
+# application.redirect_if_no_trailing_slash = False
 
 
 @application.register_route('/cat/')
-def catalog_handler(env):
+def cat_handler(env):
     return {
         "text": '<!DOCTYPE html>'
                 '<html lang="en">'
@@ -28,11 +24,12 @@ def catalog_handler(env):
     }
 
 
-@application.register_route('/template/')
-def templates_handler(env):
+@application.register_route('/fromtemplate/')
+def from_template_handler(env):
     return {
-        'text': template,
+        'text': kitty_template,
     }
+
 
 @application.register_route('/')
 def index_handler(env):
