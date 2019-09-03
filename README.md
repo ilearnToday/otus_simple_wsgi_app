@@ -16,7 +16,7 @@ from core.py import Application
 
 app = Application()
 
-@app.register_route('/index')
+@app.register_route('/index/')
 def index_page(env):
     return {
             'text': 'Hello world!'    
